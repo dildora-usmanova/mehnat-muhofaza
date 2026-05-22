@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mehnatni Muhofaza Qilish — Elektron Jurnal</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2333;
+    --border: #30363d;
+    --accent: #f0a500;
+    --accent2: #e05a00;
+    --danger: #e04444;
+    --success: #3dba74;
+    --text: #c9d1d9;
+    --text-dim: #6e7681;
+    --text-bright: #f0f6fc;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo-area { display: flex; align-items: center; gap: 12px; }
+  .logo-icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .logo-text h1 { font-size: 15px; font-weight: 600; color: var(--text-bright); letter-spacing: 0.3px; }
+  .logo-text p { font-size: 11px; color: var(--text-dim); font-family: var(--mono); }
+  .header-stats { display: flex; gap: 20px; align-items: center; }
+  .stat-pill {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    font-family: var(--mono);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .stat-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .dot-orange { background: var(--accent); }
+  .dot-red { background: var(--danger); }
+  .dot-green { background: var(--success); }
+
+  /* MAIN LAYOUT */
+  .container { display: flex; height: calc(100vh - 73px); }
+
+  /* SIDEBAR */
+  nav {
+    width: 200px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    flex-shrink: 0;
+  }
+  .nav-section { padding: 6px 16px; font-size: 10px; color: var(--text-dim); font-family: var(--mono); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 20px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-dim);
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
+    user-select: none;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { border-left-color: var(--accent); color: var(--accent); background: rgba(240,165,0,0.07); }
+  .nav-item .ni { width: 16px; text-align: center; }
+  .nav-divider { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+
+  /* CONTENT */
+  main { flex: 1; overflow-y: auto; padding: 28px; }
+
+  /* TABS */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* PAGE TITLE */
+  .page-header { margin-bottom: 24px; }
+  .page-header h2 { font-size: 20px; font-weight: 600; color: var(--text-bright); }
+  .page-header p { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-size: 12px; font-family: var(--mono);
+    color: var(--accent); letter-spacing: 0.5px;
+    text-transform: uppercase; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title::after { content:''; flex:1; height:1px; background: var(--border); }
+
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+  .form-grid.full { grid-template-columns: 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.span2 { grid-column: span 2; }
+  label { font-size: 11px; color: var(--text-dim); font-family: var(--mono); letter-spacing: 0.3px; }
+  input, select, textarea {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: var(--sans);
+    transition: border-color 0.15s;
+    outline: none;
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 80px; }
+  select option { background: var(--surface); }
+
+  /* SEVERITY BUTTONS */
+  .severity-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .sev-btn {
+    padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border);
+    cursor: pointer; font-size: 12px; font-family: var(--mono);
+    background: var(--bg); color: var(--text-dim); transition: all 0.15s;
+  }
+  .sev-btn:hover { border-color: currentColor; }
+  .sev-btn.active-low { background: rgba(61,186,116,0.15); border-color: var(--success); color: var(--success); }
+  .sev-btn.active-mid { background: rgba(240,165,0,0.15); border-color: var(--accent); color: var(--accent); }
+  .sev-btn.active-high { background: rgba(224,68,68,0.15); border-color: var(--danger); color: var(--danger); }
+
+  /* BUTTONS */
+  .btn {
+    padding: 9px 20px; border-radius: 7px; border: none;
+    cursor: pointer; font-size: 13px; font-weight: 500;
+    font-family: var(--sans); transition: all 0.15s;
+    display: inline-flex; align-items: center; gap: 7px;
+  }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: #ffb922; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-danger:hover { background: #ff5555; }
+  .btn-ghost { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text); border-color: var(--text-dim); }
+  .btn-row { display: flex; gap: 10px; margin-top: 18px; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead { background: var(--surface2); }
+  th {
+    padding: 10px 14px; text-align: left;
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    color: var(--text-dim); letter-spacing: 0.4px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 11px 14px; border-bottom: 1px solid rgba(48,54,61,0.5);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* BADGES */
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 2px 10px; border-radius: 20px;
+    font-size: 11px; font-family: var(--mono); white-space: nowrap;
+  }
+  .badge-low { background: rgba(61,186,116,0.15); color: var(--success); }
+  .badge-mid { background: rgba(240,165,0,0.15); color: var(--accent); }
+  .badge-high { background: rgba(224,68,68,0.15); color: var(--danger); }
+  .badge-yuriq { background: rgba(100,160,255,0.15); color: #6ab0ff; }
+
+  /* SEARCH BAR */
+  .search-row { display: flex; gap: 10px; margin-bottom: 18px; align-items: center; flex-wrap: wrap; }
+  .search-input-wrap { position: relative; flex: 1; min-width: 180px; }
+  .search-input-wrap input { padding-left: 32px; }
+  .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-dim); font-size: 13px; pointer-events: none; }
+
+  /* DASHBOARD GRID */
+  .dash-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .dash-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .dash-card .dc-label { font-size: 11px; color: var(--text-dim); font-family: var(--mono); letter-spacing: 0.4px; }
+  .dash-card .dc-value { font-size: 28px; font-weight: 600; color: var(--text-bright); margin: 6px 0 2px; font-family: var(--mono); }
+  .dash-card .dc-sub { font-size: 11px; color: var(--text-dim); }
+  .dash-card.warn { border-color: rgba(224,68,68,0.4); }
+  .dash-card.warn .dc-value { color: var(--danger); }
+
+  /* XODIMLAR */
+  .xodim-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .xodim-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 15px;
+    display: flex; align-items: center; gap: 12px;
+    transition: border-color 0.15s;
+  }
+  .xodim-card:hover { border-color: var(--accent); }
+  .xodim-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 14px; color: #000; flex-shrink: 0;
+  }
+  .xodim-info .xn { font-size: 13px; font-weight: 500; color: var(--text-bright); }
+  .xodim-info .xp { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+  /* YURIQ CARD */
+  .yuriq-block {
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 16px;
+    margin-bottom: 12px;
+    background: var(--surface2);
+    position: relative;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .yuriq-block:hover { border-color: var(--accent); }
+  .yuriq-block .yb-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+  .yuriq-block .yb-title { font-weight: 600; color: var(--text-bright); font-size: 14px; }
+  .yuriq-block .yb-meta { font-size: 11px; color: var(--text-dim); font-family: var(--mono); margin-top: 5px; }
+  .yuriq-block .yb-body { font-size: 13px; color: var(--text); margin-top: 10px; line-height: 1.6; }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-dim); }
+  .empty-state .es-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+  .empty-state p { font-size: 13px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--success); color: #000;
+    padding: 12px 20px; border-radius: 8px;
+    font-size: 13px; font-weight: 500;
+    transform: translateY(80px); opacity: 0;
+    transition: all 0.3s; z-index: 1000;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.error { background: var(--danger); color: #fff; }
+
+  /* RESPONSIVE */
+  @media(max-width:900px){
+    .dash-grid { grid-template-columns: 1fr 1fr; }
+    .xodim-grid { grid-template-columns: 1fr 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid.three { grid-template-columns: 1fr; }
+    .form-group.span2 { grid-column: span 1; }
+  }
+  @media(max-width:600px){
+    nav { display: none; }
+    .dash-grid { grid-template-columns: 1fr 1fr; }
+    .xodim-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Detail Modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7); z-index: 500;
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    max-width: 600px; width: 100%;
+    max-height: 80vh; overflow-y: auto;
+    position: relative;
+  }
+  .modal-close {
+    position: absolute; top: 16px; right: 18px;
+    background: none; border: none; color: var(--text-dim);
+    font-size: 18px; cursor: pointer;
+  }
+  .modal-close:hover { color: var(--text-bright); }
+  .modal h3 { font-size: 17px; color: var(--text-bright); margin-bottom: 16px; }
+  .detail-row { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .detail-label { font-size: 11px; color: var(--text-dim); font-family: var(--mono); min-width: 130px; padding-top: 2px; }
+  .detail-value { font-size: 13px; color: var(--text); flex: 1; line-height: 1.5; }
+
+  .print-none { }
+  .color-chip {
+    width: 32px; height: 32px; border-radius: 50%;
+    cursor: pointer; border: 3px solid transparent;
+    transition: all 0.2s; flex-shrink: 0;
+  }
+  .color-chip:hover { transform: scale(1.15); }
+  .color-chip.active-chip { border-color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.3); }
+  .xodim-edit-row {
+    display: flex; gap: 8px; align-items: center;
+  }
+  .xodim-edit-row input { flex: 1; }
+  .del-btn {
+    background: none; border: 1px solid var(--border);
+    color: var(--danger); border-radius: 6px;
+    width: 32px; height: 32px; cursor: pointer;
+    font-size: 15px; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.15s;
+  }
+  .del-btn:hover { background: rgba(224,68,68,0.1); border-color: var(--danger); }
+  @media print {
+    header, nav, .btn, .btn-row, .search-row { display: none !important; }
+    body { background: #fff; color: #000; }
+    .card, .dash-card, .yuriq-block { background: #fff; border: 1px solid #ccc; color: #000; }
+    th, td { color: #000; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-area">
+    <div class="logo-icon">🛡️</div>
+    <div class="logo-text">
+      <h1>Transformatsiya Ofisi — Mehnat Muhofazasi</h1>
+      <p>Elektron jurnal sistеmasi v1.0</p>
+    </div>
+  </div>
+  <div class="header-stats">
+    <div class="stat-pill"><span class="dot dot-green"></span><span id="h-yuriq">0</span> yo'l-yo'riq</div>
+    <div class="stat-pill"><span class="dot dot-red"></span><span id="h-hodisa">0</span> hodisa</div>
+    <div class="stat-pill"><span class="dot dot-orange"></span><span id="h-xodim-stat">9</span> xodim</div>
+  </div>
+</header>
+
+<div class="container">
+  <nav>
+    <div class="nav-section">Menyu</div>
+    <div class="nav-item active" onclick="goPage('dashboard',this)"><span class="ni">📊</span> Asosiy</div>
+    <div class="nav-item" onclick="goPage('yuriq-form',this)"><span class="ni">📋</span> Yo'l-yo'riq</div>
+    <div class="nav-item" onclick="goPage('hodisa-form',this)"><span class="ni">⚠️</span> Hodisa qayd</div>
+    <hr class="nav-divider">
+    <div class="nav-section">Jurnallar</div>
+    <div class="nav-item" onclick="goPage('yuriq-jurnal',this)"><span class="ni">📄</span> Yo'l-yo'riqlar</div>
+    <div class="nav-item" onclick="goPage('hodisa-jurnal',this)"><span class="ni">🔴</span> Hodisalar</div>
+    <hr class="nav-divider">
+    <div class="nav-section">Ma'lumot</div>
+    <div class="nav-item" onclick="goPage('xodimlar',this)"><span class="ni">👥</span> Xodimlar</div>
+    <hr class="nav-divider">
+    <div class="nav-item" onclick="goPage('sozlamalar',this)"><span class="ni">⚙️</span> Sozlamalar</div>
+  </nav>
+
+  <main>
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <h2>Bosh sahifa</h2>
+        <p>Umumiy statistika va oxirgi yozuvlar</p>
+      </div>
+      <div class="dash-grid">
+        <div class="dash-card">
+          <div class="dc-label">JAMI YO'L-YO'RIQLAR</div>
+          <div class="dc-value" id="d-yuriq">0</div>
+          <div class="dc-sub">Barcha xodimlar uchun</div>
+        </div>
+        <div class="dash-card warn">
+          <div class="dc-label">BAXTSIZ HODISALAR</div>
+          <div class="dc-value" id="d-hodisa">0</div>
+          <div class="dc-sub">Qayd etilgan</div>
+        </div>
+        <div class="dash-card">
+          <div class="dc-label">JAMI XODIMLAR</div>
+          <div class="dc-value">9</div>
+          <div class="dc-sub">Transformatsiya ofisi</div>
+        </div>
+        <div class="dash-card">
+          <div class="dc-label">OXIRGI YANGILANISH</div>
+          <div class="dc-value" style="font-size:16px;" id="d-sana">—</div>
+          <div class="dc-sub" id="d-sana2"></div>
+        </div>
+      </div>
+
+      <!-- Recent hodisalar -->
+      <div class="card">
+        <div class="card-title">⚠️ Oxirgi hodisalar</div>
+        <div id="dash-hodisalar">
+          <div class="empty-state"><div class="es-icon">📭</div><p>Hali hodisa qayd etilmagan</p></div>
+        </div>
+      </div>
+
+      <!-- Recent yuriqlar -->
+      <div class="card">
+        <div class="card-title">📋 Oxirgi yo'l-yo'riqlar</div>
+        <div id="dash-yuriqlar">
+          <div class="empty-state"><div class="es-icon">📭</div><p>Hali yo'l-yo'riq qayd etilmagan</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- YO'L-YO'RIQ SHAKLI -->
+    <div class="page" id="page-yuriq-form">
+      <div class="page-header">
+        <h2>Yo'l-yo'riq qayd etish</h2>
+        <p>Yangi yo'l-yo'riq yozuvini kiriting</p>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 Yo'l-yo'riq ma'lumotlari</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>SANA</label>
+            <input type="date" id="y-sana">
+          </div>
+          <div class="form-group">
+            <label>YO'L-YO'RIQ TURI</label>
+            <select id="y-tur">
+              <option value="">Tanlang...</option>
+              <option>Kirish yo'l-yo'rig'i</option>
+              <option>Dastlabki yo'l-yo'riq</option>
+              <option>Davriy yo'l-yo'riq (6 oylik)</option>
+              <option>Davriy yo'l-yo'riq (3 oylik)</option>
+              <option>Navbatdan tashqari yo'l-yo'riq</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>YO'L-YO'RIQDAN O'TUVCHI XODIM</label>
+            <select id="y-xodim">
+              <option value="">Tanlang...</option>
+              <option>Dosmetov Ulug'bek Sultonboy</option>
+              <option>Eminjanov Rahmonjon</option>
+              <option>Xalmuhamedova Xurshida Shojalalova</option>
+              <option>Mamarahimov Farxod</option>
+              <option>Tadjieva Dilfuza</option>
+              <option>Sapasheva Dilfuza</option>
+              <option>Valiyeva Dildora Saidjamalova</option>
+              <option>Abdullaeva Shodiya</option>
+              <option>Mavlanova Nargiza Xudaynazarovna</option>
+              <option value="boshqa">Boshqa...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>YO'L-YO'RIQDAN O'TKAZUVCHI</label>
+            <input type="text" id="y-otkazuvchi" placeholder="F.I.Sh.">
+          </div>
+          <div class="form-group span2">
+            <label>MAVZU / YO'RIQNOMA RAQAMI</label>
+            <input type="text" id="y-mavzu" placeholder="Yo'l-yo'riq mavzusi yoki yo'riqnoma raqami">
+          </div>
+          <div class="form-group span2">
+            <label>BO'LINMA NOMI</label>
+            <input type="text" id="y-bolinma" value="Transformatsiya jarayonlarini muvofiqlashtirish bo'limi">
+          </div>
+          <div class="form-group span2">
+            <label>IZOH (ixtiyoriy)</label>
+            <textarea id="y-izoh" placeholder="Qo'shimcha ma'lumot..."></textarea>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="saveYuriq()">💾 Saqlash</button>
+          <button class="btn btn-ghost" onclick="clearYuriq()">✕ Tozalash</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HODISA SHAKLI -->
+    <div class="page" id="page-hodisa-form">
+      <div class="page-header">
+        <h2>Baxtsiz hodisa qayd etish</h2>
+        <p>Ishlab chiqarishdagi hodisa yoki xavfli vaziyatni qayd eting</p>
+      </div>
+      <div class="card">
+        <div class="card-title">⚠️ Hodisa ma'lumotlari</div>
+        <div class="form-grid three">
+          <div class="form-group">
+            <label>SANA</label>
+            <input type="date" id="h-sana">
+          </div>
+          <div class="form-group">
+            <label>VAQT</label>
+            <input type="time" id="h-vaqt">
+          </div>
+          <div class="form-group">
+            <label>JOY</label>
+            <input type="text" id="h-joy" placeholder="Qayerda sodir bo'ldi">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>JABRLANUVCHI XODIM</label>
+            <select id="h-xodim">
+              <option value="">Tanlang...</option>
+              <option>Dosmetov Ulug'bek Sultonboy</option>
+              <option>Eminjanov Rahmonjon</option>
+              <option>Xalmuhamedova Xurshida Shojalalova</option>
+              <option>Mamarahimov Farxod</option>
+              <option>Tadjieva Dilfuza</option>
+              <option>Sapasheva Dilfuza</option>
+              <option>Valiyeva Dildora Saidjamalova</option>
+              <option>Abdullaeva Shodiya</option>
+              <option>Mavlanova Nargiza Xudaynazarovna</option>
+              <option value="boshqa">Boshqa / Mehmon</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>HODISA TURI</label>
+            <select id="h-tur">
+              <option value="">Tanlang...</option>
+              <option>Yiqilish / sirpanish</option>
+              <option>Kesish / tirnash</option>
+              <option>Elektr tasiri</option>
+              <option>Kimyoviy ta'sir</option>
+              <option>Yong'in</option>
+              <option>Yuklama / og'irlik</option>
+              <option>Transport hodisasi</option>
+              <option>Kasbiy kasallik</option>
+              <option>Boshqa</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid full" style="margin-top:14px;">
+          <div class="form-group">
+            <label>HODISA TAVSIFI</label>
+            <textarea id="h-tavsif" placeholder="Hodisa qanday sodir bo'lganini batafsil yozing..." style="min-height:100px;"></textarea>
+          </div>
+          <div class="form-group">
+            <label>OLINGAN CHORA-TADBIRLAR</label>
+            <textarea id="h-chora" placeholder="Darhol ko'rilgan chora-tadbirlar..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>OLDINI OLISH BO'YICHA TAVSIYALAR (yo'l-yo'riq uchun)</label>
+            <textarea id="h-tavsiya" placeholder="Kelajakda bunday hodisaning oldini olish uchun..."></textarea>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:14px;">
+          <label>JIDDIYLIK DARAJASI *</label>
+          <select id="h-sev" onchange="setSev(this.value)" style="max-width:260px;">
+            <option value="">Tanlang...</option>
+            <option value="low">🟢 Engil</option>
+            <option value="mid">🟡 O'rtacha</option>
+            <option value="high">🔴 Og'ir</option>
+          </select>
+          <div class="severity-group" id="sev-group" style="margin-top:8px;">
+            <button class="sev-btn" id="sev-low" onclick="setSev('low')">🟢 Engil</button>
+            <button class="sev-btn" id="sev-mid" onclick="setSev('mid')">🟡 O'rtacha</button>
+            <button class="sev-btn" id="sev-high" onclick="setSev('high')">🔴 Og'ir</button>
+          </div>
+        </div>
+        <!-- YANGI: Tanishib chiqish bo'limi -->
+        <div style="margin-top:20px;padding:16px;background:rgba(240,165,0,0.06);border:1px solid rgba(240,165,0,0.25);border-radius:10px;">
+          <div class="card-title" style="margin-bottom:14px;">👁️ Hodisa bilan tanishib chiqish (Transformatsiya ofisi)</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>HODISA BILAN TANISHIB CHIQUVCHI XODIM</label>
+              <select id="h-tanishuvchi">
+                <option value="">Tanlang...</option>
+                <option>Dosmetov Ulug'bek Sultonboy</option>
+                <option>Eminjanov Rahmonjon</option>
+                <option>Xalmuhamedova Xurshida Shojalalova</option>
+                <option>Mamarahimov Farxod</option>
+                <option>Tadjieva Dilfuza</option>
+                <option>Sapasheva Dilfuza</option>
+                <option>Valiyeva Dildora Saidjamalova</option>
+                <option>Abdullaeva Shodiya</option>
+                <option>Mavlanova Nargiza Xudaynazarovna</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>YO'L-YO'RIQDAN O'TKAZUVCHI MASUL SHAXS</label>
+              <select id="h-masul">
+                <option value="">Tanlang...</option>
+                <option>Dosmetov Ulug'bek Sultonboy</option>
+                <option>Eminjanov Rahmonjon</option>
+                <option>Xalmuhamedova Xurshida Shojalalova</option>
+                <option>Mamarahimov Farxod</option>
+                <option>Tadjieva Dilfuza</option>
+                <option>Sapasheva Dilfuza</option>
+                <option>Valiyeva Dildora Saidjamalova</option>
+                <option>Abdullaeva Shodiya</option>
+                <option>Mavlanova Nargiza Xudaynazarovna</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:14px;display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;" onclick="toggleTanishdi()">
+            <div id="check-box" style="width:22px;height:22px;border-radius:5px;border:2px solid var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0;">
+              <span id="check-icon" style="display:none;color:#000;font-size:14px;font-weight:bold;">✓</span>
+            </div>
+            <div>
+              <div style="font-size:13px;color:var(--text-bright);font-weight:500;">Xodim hodisa bilan tanishib chiqdi</div>
+              <div style="font-size:11px;color:var(--text-dim);margin-top:2px;font-family:var(--mono);">Tanlangan xodim hodisa materiallarini ko'rib chiqganini tasdiqlash</div>
+            </div>
+            <input type="hidden" id="h-tanishdi" value="false">
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-danger" onclick="saveHodisa()">⚠️ Hodisani saqlash</button>
+          <button class="btn btn-ghost" onclick="clearHodisa()">✕ Tozalash</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- YO'L-YO'RIQLAR JURNALI -->
+    <div class="page" id="page-yuriq-jurnal">
+      <div class="page-header">
+        <h2>Yo'l-yo'riqlar jurnali</h2>
+        <p>Barcha o'tkazilgan yo'l-yo'riqlar ro'yxati</p>
+      </div>
+      <div class="search-row">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Xodim ismi yoki mavzu bo'yicha qidiring..." oninput="filterYuriq(this.value)">
+        </div>
+        <select onchange="filterYuriqTur(this.value)" style="width:200px;">
+          <option value="">Barcha turlar</option>
+          <option>Kirish yo'l-yo'rig'i</option>
+          <option>Dastlabki yo'l-yo'riq</option>
+          <option>Davriy yo'l-yo'riq (6 oylik)</option>
+          <option>Davriy yo'l-yo'riq (3 oylik)</option>
+          <option>Navbatdan tashqari yo'l-yo'riq</option>
+        </select>
+        <button class="btn btn-ghost" onclick="window.print()">🖨️ Chop etish</button>
+      </div>
+      <div class="table-wrap">
+        <table id="yuriq-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Sana</th>
+              <th>Xodim</th>
+              <th>Turi</th>
+              <th>Mavzu</th>
+              <th>O'tkazuvchi</th>
+              <th>Bo'linma</th>
+              <th>Amal</th>
+            </tr>
+          </thead>
+          <tbody id="yuriq-tbody">
+            <tr><td colspan="8"><div class="empty-state"><div class="es-icon">📄</div><p>Hali yo'l-yo'riq qayd etilmagan</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- HODISALAR JURNALI -->
+    <div class="page" id="page-hodisa-jurnal">
+      <div class="page-header">
+        <h2>Hodisalar jurnali</h2>
+        <p>Qayd etilgan baxtsiz hodisalar va xavfli vaziyatlar</p>
+      </div>
+      <div class="search-row">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Xodim yoki tavsif bo'yicha qidiring..." oninput="filterHodisa(this.value)">
+        </div>
+        <select onchange="filterHodisaSev(this.value)" style="width:160px;">
+          <option value="">Barcha darajalar</option>
+          <option value="low">Engil</option>
+          <option value="mid">O'rtacha</option>
+          <option value="high">Og'ir</option>
+        </select>
+        <button class="btn btn-ghost" onclick="window.print()">🖨️ Chop etish</button>
+      </div>
+      <div id="hodisa-list">
+        <div class="empty-state"><div class="es-icon">✅</div><p>Hali hodisa qayd etilmagan — bu yaxshi!</p></div>
+      </div>
+    </div>
+
+    <!-- XODIMLAR -->
+    <div class="page" id="page-xodimlar">
+      <div class="page-header">
+        <h2>Xodimlar ro'yxati</h2>
+        <p>Transformatsiya ofisi xodimlari</p>
+      </div>
+      <div class="xodim-grid">
+        <div class="xodim-card"><div class="xodim-avatar">DU</div><div class="xodim-info"><div class="xn">Dosmetov Ulug'bek S.</div><div class="xp">Transformatsiya ofisi rahbari</div></div></div>
+        <div class="xodim-card"><div class="xodim-avatar">ER</div><div class="xodim-info"><div class="xn">Eminjanov Rahmonjon</div><div class="xp">Rahbar o'rinbosari</div></div></div>
+        <div class="xodim-card"><div class="xodim-avatar">XX</div><div class="xodim-info"><div class="xn">Xalmuhamedova Xurshida</div><div class="xp">Bo'lim boshlig'i</div></div></div>
+        <div class="xodim-card"><div class="xodim-avatar">MF</div><div class="xodim-info"><div class="xn">Mamarahimov Farxod</div><div class="xp">Bo'lim boshlig'i o'rinbosari</div></div></div>
+        <div class="xodim-card"><div class="xodim-avatar">TD</div><div class="xodim-info"><div class="xn">Tadjieva Dilfuza</div><div class="xp">Bosh mutaxassis</div></div></div>
+        <div class="xodim-card"><div class="xodim-avatar">SD</div><div class="xodim-info"><div class="xn">Sapasheva Dilfuza</div><div class="xp">Bosh mutaxassis</div></div></div>
+        <div class="xodim-card"><div class="xodim-avatar">VD</div><div class="xodim-info"><div class="xn">Valiyeva Dildora S.</div><div class="xp">2-toifali mutaxassis</div></div></div>
+        <div class="xodim-card"><div class="xodim-avatar">AS</div><div class="xodim-info"><div class="xn">Abdullaeva Shodiya</div><div class="xp">1-toifali mutaxassis</div></div></div>
+        <div class="xodim-card"><div class="xodim-avatar">MN</div><div class="xodim-info"><div class="xn">Mavlanova Nargiza X.</div><div class="xp">ESG mutaxassisi</div></div></div>
+      </div>
+    </div>
+
+    <!-- SOZLAMALAR -->
+    <div class="page" id="page-sozlamalar">
+      <div class="page-header">
+        <h2>⚙️ Sozlamalar</h2>
+        <p>Tizimni o'zingiz uchun moslashtiring</p>
+      </div>
+
+      <!-- Tashkilot ma'lumotlari -->
+      <div class="card">
+        <div class="card-title">🏢 Tashkilot ma'lumotlari</div>
+        <div class="form-grid">
+          <div class="form-group span2">
+            <label>TASHKILOT NOMI</label>
+            <input type="text" id="s-tashkilot" placeholder="Tashkilot nomi...">
+          </div>
+          <div class="form-group span2">
+            <label>BO'LINMA NOMI</label>
+            <input type="text" id="s-bolinma" placeholder="Bo'linma nomi...">
+          </div>
+          <div class="form-group">
+            <label>RAHBAR F.I.SH.</label>
+            <input type="text" id="s-rahbar" placeholder="Rahbar ismi...">
+          </div>
+          <div class="form-group">
+            <label>TIZIM VERSIYASI / YORLIQ</label>
+            <input type="text" id="s-versiya" placeholder="v1.0">
+          </div>
+        </div>
+      </div>
+
+      <!-- Xodimlar ro'yxatini tahrirlash -->
+      <div class="card">
+        <div class="card-title">👥 Xodimlar ro'yxati</div>
+        <p style="font-size:12px;color:var(--text-dim);margin-bottom:14px;">Har bir xodimni alohida qatorga yozing (F.I.Sh. va lavozim vergul bilan ajrating)</p>
+        <div id="xodim-list-edit" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"></div>
+        <button class="btn btn-ghost" onclick="addXodimRow()" style="font-size:12px;">➕ Xodim qo'shish</button>
+      </div>
+
+      <!-- Hodisa turlari -->
+      <div class="card">
+        <div class="card-title">⚠️ Hodisa turlari ro'yxati</div>
+        <p style="font-size:12px;color:var(--text-dim);margin-bottom:14px;">Har bir hodisa turini alohida qatorga yozing</p>
+        <div id="hodisa-tur-edit" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"></div>
+        <button class="btn btn-ghost" onclick="addHodisaTurRow()" style="font-size:12px;">➕ Tur qo'shish</button>
+      </div>
+
+      <!-- Yo'l-yo'riq turlari -->
+      <div class="card">
+        <div class="card-title">📋 Yo'l-yo'riq turlari</div>
+        <p style="font-size:12px;color:var(--text-dim);margin-bottom:14px;">Har bir turni alohida qatorga yozing</p>
+        <div id="yuriq-tur-edit" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"></div>
+        <button class="btn btn-ghost" onclick="addYuriqTurRow()" style="font-size:12px;">➕ Tur qo'shish</button>
+      </div>
+
+      <!-- Ranglar / Tema -->
+      <div class="card">
+        <div class="card-title">🎨 Asosiy rang</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;">
+          <div class="color-chip active-chip" data-color="#f0a500" style="background:#f0a500;" onclick="setAccent('#f0a500','#e05a00',this)"></div>
+          <div class="color-chip" data-color="#3dba74" style="background:#3dba74;" onclick="setAccent('#3dba74','#2a8f55',this)"></div>
+          <div class="color-chip" data-color="#6ab0ff" style="background:#6ab0ff;" onclick="setAccent('#6ab0ff','#3a80df',this)"></div>
+          <div class="color-chip" data-color="#e04444" style="background:#e04444;" onclick="setAccent('#e04444','#b02020',this)"></div>
+          <div class="color-chip" data-color="#c084fc" style="background:#c084fc;" onclick="setAccent('#c084fc','#9040d0',this)"></div>
+          <div class="color-chip" data-color="#fb923c" style="background:#fb923c;" onclick="setAccent('#fb923c','#d05010',this)"></div>
+        </div>
+        <p style="font-size:11px;color:var(--text-dim);font-family:var(--mono);">Tizim asosiy rangini tanlang</p>
+      </div>
+
+      <!-- Ma'lumotlarni boshqarish -->
+      <div class="card">
+        <div class="card-title">💾 Ma'lumotlarni boshqarish</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-ghost" onclick="exportData()">📤 Ma'lumotlarni yuklab olish (JSON)</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('import-file').click()">📥 Ma'lumotlarni yuklash</button>
+          <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importData(event)">
+          <button class="btn btn-ghost" style="color:var(--danger);border-color:var(--danger);" onclick="clearAllData()">🗑️ Barcha ma'lumotlarni o'chirish</button>
+        </div>
+        <p style="font-size:11px;color:var(--text-dim);margin-top:10px;">Ma'lumotlar brauzerning xotirasida (localStorage) saqlanadi. Zaxira nusxa olish tavsiya etiladi.</p>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveSozlamalar()">💾 Sozlamalarni saqlash</button>
+        <button class="btn btn-ghost" onclick="loadSozlamalarForm()">↺ Bekor qilish</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-content">
+    <button class="modal-close" onclick="closeModalBtn()">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✅ Muvaffaqiyatli saqlandi</div>
+
+<script>
+  // ---- DATA ----
+  let yuriqlar = JSON.parse(localStorage.getItem('yuriqlar') || '[]');
+  let hodisalar = JSON.parse(localStorage.getItem('hodisalar') || '[]');
+  let currentSev = '';
+
+  // ---- NAVIGATION ----
+  function goPage(id, el) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    if (el) el.classList.add('active');
+    if (id === 'dashboard') refreshDash();
+    if (id === 'yuriq-jurnal') renderYuriqTable(yuriqlar);
+    if (id === 'hodisa-jurnal') renderHodisaList(hodisalar);
+  }
+
+  // ---- SEVERITY ----
+  function setSev(v) {
+    currentSev = v;
+    ['low','mid','high'].forEach(s => {
+      const b = document.getElementById('sev-'+s);
+      b.className = 'sev-btn';
+      if (s === v) b.classList.add('active-'+s);
+    });
+    const sel = document.getElementById('h-sev');
+    if (sel && sel.value !== v) sel.value = v;
+  }
+
+  // ---- SAVE YO'L-YO'RIQ ----
+  function saveYuriq() {
+    const sana = document.getElementById('y-sana').value;
+    const tur = document.getElementById('y-tur').value;
+    const xodim = document.getElementById('y-xodim').value;
+    const otkazuvchi = document.getElementById('y-otkazuvchi').value;
+    const mavzu = document.getElementById('y-mavzu').value;
+    const bolinma = document.getElementById('y-bolinma').value;
+    const izoh = document.getElementById('y-izoh').value;
+    if (!sana || !tur || !xodim || !otkazuvchi) { showToast('Majburiy maydonlarni to\'ldiring!','error'); return; }
+    const item = { id: Date.now(), sana, tur, xodim, otkazuvchi, mavzu, bolinma, izoh };
+    yuriqlar.unshift(item);
+    saveData();
+    clearYuriq();
+    showToast('Yo\'l-yo\'riq muvaffaqiyatli saqlandi ✅');
+    updateHeaderStats();
+  }
+
+  function clearYuriq() {
+    ['y-sana','y-mavzu','y-otkazuvchi','y-izoh'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('y-tur').value = '';
+    document.getElementById('y-xodim').value = '';
+    document.getElementById('y-bolinma').value = 'Transformatsiya jarayonlarini muvofiqlashtirish bo\'limi';
+  }
+
+  // ---- SAVE HODISA ----
+  function saveHodisa() {
+    const sana = document.getElementById('h-sana').value;
+    const vaqt = document.getElementById('h-vaqt').value;
+    const joy = document.getElementById('h-joy').value;
+    const xodim = document.getElementById('h-xodim').value;
+    const tur = document.getElementById('h-tur').value;
+    const tavsif = document.getElementById('h-tavsif').value;
+    const chora = document.getElementById('h-chora').value;
+    const tavsiya = document.getElementById('h-tavsiya').value;
+    const tanishuvchi = document.getElementById('h-tanishuvchi').value;
+    const masul = document.getElementById('h-masul').value;
+    const tanishdi = document.getElementById('h-tanishdi').value === 'true';
+    const sev = currentSev || (document.getElementById('h-sev') ? document.getElementById('h-sev').value : '');
+    if (!sana || !xodim || !tur || !tavsif) { showToast('Majburiy maydonlarni to\'ldiring!','error'); return; }
+    if (!sev) {
+      showToast('Jiddiylik darajasini tanlang (Engil / O\'rtacha / Og\'ir)!','error');
+      document.getElementById('sev-group').style.border = '1px solid var(--danger)';
+      document.getElementById('sev-group').style.borderRadius = '8px';
+      document.getElementById('sev-group').style.padding = '8px';
+      setTimeout(() => {
+        document.getElementById('sev-group').style.border = '';
+        document.getElementById('sev-group').style.padding = '';
+      }, 3000);
+      return;
+    }
+    const item = { id: Date.now(), sana, vaqt, joy, xodim, tur, tavsif, chora, tavsiya, sev, tanishuvchi, masul, tanishdi };
+    hodisalar.unshift(item);
+    saveData();
+    clearHodisa();
+    showToast('Hodisa qayd etildi ⚠️');
+    updateHeaderStats();
+  }
+
+  function clearHodisa() {
+    ['h-sana','h-vaqt','h-joy','h-tavsif','h-chora','h-tavsiya'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('h-xodim').value = '';
+    document.getElementById('h-tur').value = '';
+    document.getElementById('h-tanishuvchi').value = '';
+    document.getElementById('h-masul').value = '';
+    document.getElementById('h-tanishdi').value = 'false';
+    const box = document.getElementById('check-box');
+    box.style.background = 'var(--bg)';
+    box.style.borderColor = 'var(--border)';
+    document.getElementById('check-icon').style.display = 'none';
+    currentSev = '';
+    ['low','mid','high'].forEach(s => document.getElementById('sev-'+s).className = 'sev-btn');
+    document.getElementById('sev-group').style.border = '';
+    document.getElementById('sev-group').style.padding = '';
+    const sel = document.getElementById('h-sev');
+    if (sel) sel.value = '';
+  }
+
+  // ---- RENDER ----
+  function renderYuriqTable(data) {
+    const tbody = document.getElementById('yuriq-tbody');
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="es-icon">📄</div><p>Hali yo\'l-yo\'riq qayd etilmagan</p></div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map((r, i) => `
+      <tr>
+        <td style="color:var(--text-dim);font-family:var(--mono)">${i+1}</td>
+        <td style="font-family:var(--mono);white-space:nowrap">${r.sana}</td>
+        <td><b style="color:var(--text-bright)">${r.xodim}</b></td>
+        <td><span class="badge badge-yuriq">${r.tur}</span></td>
+        <td style="color:var(--text-dim)">${r.mavzu||'—'}</td>
+        <td>${r.otkazuvchi}</td>
+        <td style="color:var(--text-dim);font-size:12px">${r.bolinma||'—'}</td>
+        <td><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;" onclick="showYuriqDetail(${r.id})">Ko'rish</button>
+            <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;color:var(--danger);border-color:var(--danger);" onclick="deleteYuriq(${r.id})">O'ch</button></td>
+      </tr>
+    `).join('');
+  }
+
+  function renderHodisaList(data) {
+    const el = document.getElementById('hodisa-list');
+    if (!data.length) {
+      el.innerHTML = '<div class="empty-state"><div class="es-icon">✅</div><p>Hali hodisa qayd etilmagan — bu yaxshi!</p></div>';
+      return;
+    }
+    const sevLabel = { low:'🟢 Engil', mid:'🟡 O\'rtacha', high:'🔴 Og\'ir' };
+    const sevBadge = { low:'badge-low', mid:'badge-mid', high:'badge-high' };
+    el.innerHTML = data.map(r => `
+      <div class="yuriq-block" onclick="showHodisaDetail(${r.id})">
+        <div class="yb-top">
+          <div>
+            <div class="yb-title">⚠️ ${r.tur}</div>
+            <div class="yb-meta">${r.sana}${r.vaqt ? ' • '+r.vaqt:''} ${r.joy ? '• '+r.joy:''}</div>
+          </div>
+          <span class="badge ${sevBadge[r.sev]}">${sevLabel[r.sev]}</span>
+        </div>
+        <div class="yb-body"><b style="color:var(--accent)">${r.xodim}</b> — ${r.tavsif.substring(0,120)}${r.tavsif.length>120?'...':''}</div>
+        ${r.tavsiya ? `<div style="margin-top:8px;padding:8px 10px;background:rgba(61,186,116,0.07);border-left:3px solid var(--success);border-radius:4px;font-size:12px;color:var(--success);">🛡️ <b>Oldini olish:</b> ${r.tavsiya.substring(0,100)}${r.tavsiya.length>100?'...':''}</div>` : ''}
+        <div style="margin-top:10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          ${r.tanishuvchi ? `<span style="font-size:11px;color:var(--text-dim);font-family:var(--mono);">👁️ ${r.tanishuvchi}</span>` : ''}
+          ${r.masul ? `<span style="font-size:11px;color:var(--text-dim);font-family:var(--mono);">📋 Masul: ${r.masul}</span>` : ''}
+          ${r.tanishuvchi ? (r.tanishdi 
+            ? `<span style="font-size:11px;color:var(--success);font-weight:600;">✅ Tanishib chiqildi</span>` 
+            : `<span style="font-size:11px;color:var(--danger);">⬜ Tanishib chiqilmagan</span>`) 
+            : ''}
+        </div>
+        <div style="margin-top:8px;display:flex;gap:8px;">
+          <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;" onclick="event.stopPropagation();showHodisaDetail(${r.id})">Batafsil</button>
+          ${r.tanishuvchi && !r.tanishdi ? `<button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;color:var(--success);border-color:var(--success);" onclick="event.stopPropagation();toggleTanishdiFromModal(${r.id})">✅ Tanishib chiqdi</button>` : ''}
+          <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;color:var(--danger);border-color:var(--danger);" onclick="event.stopPropagation();deleteHodisa(${r.id})">O'chirish</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ---- DASHBOARD ----
+  function refreshDash() {
+    document.getElementById('d-yuriq').textContent = yuriqlar.length;
+    document.getElementById('d-hodisa').textContent = hodisalar.length;
+    const now = new Date();
+    document.getElementById('d-sana').textContent = now.toLocaleDateString('uz-UZ');
+    document.getElementById('d-sana2').textContent = now.toLocaleTimeString('uz-UZ',{hour:'2-digit',minute:'2-digit'});
+
+    // recent hodisalar
+    const dh = document.getElementById('dash-hodisalar');
+    const sevLabel = { low:'🟢 Engil', mid:'🟡 O\'rtacha', high:'🔴 Og\'ir' };
+    const sevBadge = { low:'badge-low', mid:'badge-mid', high:'badge-high' };
+    if (!hodisalar.length) {
+      dh.innerHTML = '<div class="empty-state"><div class="es-icon">✅</div><p>Hali hodisa qayd etilmagan</p></div>';
+    } else {
+      dh.innerHTML = hodisalar.slice(0,3).map(r=>`
+        <div class="yuriq-block" onclick="showHodisaDetail(${r.id})">
+          <div class="yb-top">
+            <div class="yb-title">⚠️ ${r.tur} — <span style="color:var(--accent)">${r.xodim}</span></div>
+            <span class="badge ${sevBadge[r.sev]}">${sevLabel[r.sev]}</span>
+          </div>
+          <div class="yb-meta">${r.sana}</div>
+          <div class="yb-body">${r.tavsif.substring(0,100)}...</div>
+        </div>
+      `).join('');
+    }
+
+    // recent yuriqlar
+    const dy = document.getElementById('dash-yuriqlar');
+    if (!yuriqlar.length) {
+      dy.innerHTML = '<div class="empty-state"><div class="es-icon">📭</div><p>Hali yo\'l-yo\'riq qayd etilmagan</p></div>';
+    } else {
+      dy.innerHTML = yuriqlar.slice(0,3).map(r=>`
+        <div class="yuriq-block">
+          <div class="yb-top">
+            <div class="yb-title">📋 ${r.xodim}</div>
+            <span class="badge badge-yuriq">${r.tur}</span>
+          </div>
+          <div class="yb-meta">${r.sana} • ${r.otkazuvchi}</div>
+          ${r.mavzu?`<div class="yb-body">${r.mavzu}</div>`:''}
+        </div>
+      `).join('');
+    }
+  }
+
+  function updateHeaderStats() {
+    document.getElementById('h-yuriq').textContent = yuriqlar.length;
+    document.getElementById('h-hodisa').textContent = hodisalar.length;
+  }
+
+  // ---- DETAIL MODALS ----
+  function showYuriqDetail(id) {
+    const r = yuriqlar.find(x=>x.id===id); if(!r) return;
+    document.getElementById('modal-body').innerHTML = `
+      <h3>📋 Yo'l-yo'riq tafsiloti</h3>
+      <div class="detail-row"><span class="detail-label">Sana</span><span class="detail-value">${r.sana}</span></div>
+      <div class="detail-row"><span class="detail-label">Xodim</span><span class="detail-value"><b>${r.xodim}</b></span></div>
+      <div class="detail-row"><span class="detail-label">Turi</span><span class="detail-value"><span class="badge badge-yuriq">${r.tur}</span></span></div>
+      <div class="detail-row"><span class="detail-label">Mavzu</span><span class="detail-value">${r.mavzu||'—'}</span></div>
+      <div class="detail-row"><span class="detail-label">O'tkazuvchi</span><span class="detail-value">${r.otkazuvchi}</span></div>
+      <div class="detail-row"><span class="detail-label">Bo'linma</span><span class="detail-value">${r.bolinma||'—'}</span></div>
+      ${r.izoh?`<div class="detail-row"><span class="detail-label">Izoh</span><span class="detail-value">${r.izoh}</span></div>`:''}
+    `;
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  function showHodisaDetail(id) {
+    const r = hodisalar.find(x=>x.id===id); if(!r) return;
+    const sevLabel = { low:'🟢 Engil', mid:'🟡 O\'rtacha', high:'🔴 Og\'ir' };
+    const sevBadge = { low:'badge-low', mid:'badge-mid', high:'badge-high' };
+    document.getElementById('modal-body').innerHTML = `
+      <h3>⚠️ Hodisa tafsiloti</h3>
+      <div class="detail-row"><span class="detail-label">Sana / Vaqt</span><span class="detail-value">${r.sana} ${r.vaqt||''}</span></div>
+      <div class="detail-row"><span class="detail-label">Joy</span><span class="detail-value">${r.joy||'—'}</span></div>
+      <div class="detail-row"><span class="detail-label">Jabrlanuvchi</span><span class="detail-value"><b>${r.xodim}</b></span></div>
+      <div class="detail-row"><span class="detail-label">Hodisa turi</span><span class="detail-value">${r.tur}</span></div>
+      <div class="detail-row"><span class="detail-label">Jiddiylik</span><span class="detail-value"><span class="badge ${sevBadge[r.sev]}">${sevLabel[r.sev]}</span></span></div>
+      <div class="detail-row"><span class="detail-label">Tavsif</span><span class="detail-value">${r.tavsif}</span></div>
+      ${r.chora?`<div class="detail-row"><span class="detail-label">Ko'rilgan chora</span><span class="detail-value">${r.chora}</span></div>`:''}
+      ${r.tavsiya?`<div class="detail-row"><span class="detail-label">Oldini olish tavsiyasi</span><span class="detail-value" style="color:var(--success)">${r.tavsiya}</span></div>`:''}
+      <div style="margin-top:16px;padding:14px;background:rgba(240,165,0,0.06);border:1px solid rgba(240,165,0,0.2);border-radius:8px;">
+        <div style="font-size:11px;color:var(--accent);font-family:var(--mono);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:10px;">👁️ Transformatsiya ofisi</div>
+        <div class="detail-row"><span class="detail-label">Tanishib chiquvchi</span><span class="detail-value">${r.tanishuvchi||'<span style="color:var(--text-dim)">Belgilanmagan</span>'}</span></div>
+        <div class="detail-row"><span class="detail-label">Masul shaxs</span><span class="detail-value">${r.masul||'<span style="color:var(--text-dim)">Belgilanmagan</span>'}</span></div>
+        <div class="detail-row"><span class="detail-label">Tanishib chiqdi</span><span class="detail-value">
+          ${r.tanishdi
+            ? '<span style="color:var(--success);font-weight:600;">✅ Ha, tanishib chiqildi</span>'
+            : '<span style="color:var(--danger);">⬜ Hali tanishib chiqilmagan</span>'}
+        </span></div>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+        ${r.tanishuvchi ? `<button class="btn btn-ghost" style="font-size:12px;padding:6px 14px;" onclick="toggleTanishdiFromModal(${r.id})">${r.tanishdi ? '⬜ Bekor qilish' : '✅ Tanishib chiqildi deb belgilash'}</button>` : ''}
+      </div>
+    `;
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  function closeModal(e) { if(e.target === document.getElementById('modal-overlay')) closeModalBtn(); }
+  function closeModalBtn() { document.getElementById('modal-overlay').classList.remove('open'); }
+
+  // ---- DELETE ----
+  function deleteYuriq(id) {
+    if (!confirm('Bu yo\'l-yo\'riqni o\'chirmoqchimisiz?')) return;
+    yuriqlar = yuriqlar.filter(x=>x.id!==id);
+    saveData(); renderYuriqTable(yuriqlar); updateHeaderStats();
+    showToast('O\'chirildi');
+  }
+  function deleteHodisa(id) {
+    if (!confirm('Bu hodisani o\'chirmoqchimisiz?')) return;
+    hodisalar = hodisalar.filter(x=>x.id!==id);
+    saveData(); renderHodisaList(hodisalar); updateHeaderStats();
+    showToast('O\'chirildi');
+  }
+
+  // ---- FILTER ----
+  let yuriqFilter = { text:'', tur:'' };
+  function filterYuriq(val) {
+    yuriqFilter.text = val.toLowerCase();
+    applyYuriqFilter();
+  }
+  function filterYuriqTur(val) {
+    yuriqFilter.tur = val;
+    applyYuriqFilter();
+  }
+  function applyYuriqFilter() {
+    let data = yuriqlar;
+    if (yuriqFilter.text) data = data.filter(r => (r.xodim+r.mavzu+r.otkazuvchi).toLowerCase().includes(yuriqFilter.text));
+    if (yuriqFilter.tur) data = data.filter(r => r.tur === yuriqFilter.tur);
+    renderYuriqTable(data);
+  }
+
+  let hodisaFilter = { text:'', sev:'' };
+  function filterHodisa(val) { hodisaFilter.text = val.toLowerCase(); applyHodisaFilter(); }
+  function filterHodisaSev(val) { hodisaFilter.sev = val; applyHodisaFilter(); }
+  function applyHodisaFilter() {
+    let data = hodisalar;
+    if (hodisaFilter.text) data = data.filter(r=>(r.xodim+r.tavsif+r.tur).toLowerCase().includes(hodisaFilter.text));
+    if (hodisaFilter.sev) data = data.filter(r=>r.sev===hodisaFilter.sev);
+    renderHodisaList(data);
+  }
+
+  // ---- STORAGE ----
+  function saveData() {
+    localStorage.setItem('yuriqlar', JSON.stringify(yuriqlar));
+    localStorage.setItem('hodisalar', JSON.stringify(hodisalar));
+  }
+
+  // ---- TOAST ----
+  function showToast(msg, type='ok') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast' + (type==='error' ? ' error' : '');
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 3000);
+  }
+
+  // ---- SOZLAMALAR ----
+  const DEFAULT_XODIMLAR = [
+    { ism: "Dosmetov Ulug'bek Sultonboy", lavozim: "Transformatsiya ofisi rahbari" },
+    { ism: "Eminjanov Rahmonjon", lavozim: "Rahbar o'rinbosari" },
+    { ism: "Xalmuhamedova Xurshida Shojalalova", lavozim: "Bo'lim boshlig'i" },
+    { ism: "Mamarahimov Farxod", lavozim: "Bo'lim boshlig'i o'rinbosari" },
+    { ism: "Tadjieva Dilfuza", lavozim: "Bosh mutaxassis" },
+    { ism: "Sapasheva Dilfuza", lavozim: "Bosh mutaxassis" },
+    { ism: "Valiyeva Dildora Saidjamalova", lavozim: "2-toifali mutaxassis" },
+    { ism: "Abdullaeva Shodiya", lavozim: "1-toifali mutaxassis" },
+    { ism: "Mavlanova Nargiza Xudaynazarovna", lavozim: "ESG mutaxassisi" }
+  ];
+  const DEFAULT_HODISA_TURLAR = [
+    "Yiqilish / sirpanish","Kesish / tirnash","Elektr tasiri",
+    "Kimyoviy ta'sir","Yong'in","Yuklama / og'irlik","Transport hodisasi","Kasbiy kasallik","Boshqa"
+  ];
+  const DEFAULT_YURIQ_TURLAR = [
+    "Kirish yo'l-yo'rig'i","Dastlabki yo'l-yo'riq","Davriy yo'l-yo'riq (6 oylik)",
+    "Davriy yo'l-yo'riq (3 oylik)","Navbatdan tashqari yo'l-yo'riq"
+  ];
+
+  function getSozlamalar() {
+    const saved = localStorage.getItem('sozlamalar');
+    if (saved) return JSON.parse(saved);
+    return {
+      tashkilot: "Transformatsiya Ofisi — Mehnat Muhofazasi",
+      bolinma: "Transformatsiya jarayonlarini muvofiqlashtirish bo'limi",
+      rahbar: "",
+      versiya: "v1.0",
+      accent: "#f0a500",
+      accent2: "#e05a00",
+      xodimlar: DEFAULT_XODIMLAR,
+      hodisaTurlar: DEFAULT_HODISA_TURLAR,
+      yuriqTurlar: DEFAULT_YURIQ_TURLAR
+    };
+  }
+
+  function applySettings(s) {
+    document.documentElement.style.setProperty('--accent', s.accent);
+    document.documentElement.style.setProperty('--accent2', s.accent2 || s.accent);
+    // Header
+    document.querySelector('.logo-text h1').textContent = s.tashkilot || "Transformatsiya Ofisi";
+    document.querySelector('.logo-text p').textContent = s.versiya || "v1.0";
+    // Xodimlar dropdown options
+    const opts = s.xodimlar.map(x => `<option>${x.ism}</option>`).join('');
+    const optsExtra = opts + '<option value="boshqa">Boshqa...</option>';
+    ['y-xodim','h-xodim','h-tanishuvchi','h-masul'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const hasExtra = id === 'y-xodim' || id === 'h-xodim';
+      el.innerHTML = `<option value="">Tanlang...</option>${hasExtra ? optsExtra : opts}`;
+    });
+    // Hodisa turlari
+    const hturOpts = s.hodisaTurlar.map(t => `<option>${t}</option>`).join('');
+    document.getElementById('h-tur').innerHTML = `<option value="">Tanlang...</option>${hturOpts}`;
+    // Yuriq turlari
+    const yturOpts = s.yuriqTurlar.map(t => `<option>${t}</option>`).join('');
+    ['y-tur'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = `<option value="">Tanlang...</option>${yturOpts}`;
+    });
+    // Xodimlar page
+    renderXodimlarPage(s.xodimlar);
+    // Bolinma default
+    const bolinmaEl = document.getElementById('y-bolinma');
+    if (bolinmaEl && !bolinmaEl.value) bolinmaEl.value = s.bolinma || '';
+  }
+
+  function renderXodimlarPage(xodimlar) {
+    const grid = document.querySelector('.xodim-grid');
+    if (!grid) return;
+    grid.innerHTML = xodimlar.map(x => {
+      const initials = x.ism.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+      return `<div class="xodim-card"><div class="xodim-avatar">${initials}</div><div class="xodim-info"><div class="xn">${x.ism}</div><div class="xp">${x.lavozim}</div></div></div>`;
+    }).join('');
+  }
+
+  function loadSozlamalarForm() {
+    const s = getSozlamalar();
+    document.getElementById('s-tashkilot').value = s.tashkilot || '';
+    document.getElementById('s-bolinma').value = s.bolinma || '';
+    document.getElementById('s-rahbar').value = s.rahbar || '';
+    document.getElementById('s-versiya').value = s.versiya || '';
+    // Xodimlar rows
+    renderXodimEditRows(s.xodimlar);
+    // Hodisa tur rows
+    renderSimpleEditRows('hodisa-tur-edit', s.hodisaTurlar, 'hodisa');
+    // Yuriq tur rows
+    renderSimpleEditRows('yuriq-tur-edit', s.yuriqTurlar, 'yuriq');
+    // Color chips
+    document.querySelectorAll('.color-chip').forEach(c => {
+      c.classList.toggle('active-chip', c.dataset.color === s.accent);
+    });
+  }
+
+  function renderXodimEditRows(xodimlar) {
+    const el = document.getElementById('xodim-list-edit');
+    el.innerHTML = '';
+    xodimlar.forEach((x, i) => {
+      const row = document.createElement('div');
+      row.className = 'xodim-edit-row';
+      row.innerHTML = `
+        <input type="text" value="${x.ism}" placeholder="F.I.Sh." data-i="${i}" data-field="ism" oninput="updateXodimField(this)">
+        <input type="text" value="${x.lavozim}" placeholder="Lavozimi" data-i="${i}" data-field="lavozim" oninput="updateXodimField(this)" style="max-width:220px;">
+        <button class="del-btn" onclick="removeXodimRow(${i})">✕</button>
+      `;
+      el.appendChild(row);
+    });
+  }
+
+  let _xodimlar = [];
+  let _hodisaTurlar = [];
+  let _yuriqTurlar = [];
+
+  function loadEditArrays() {
+    const s = getSozlamalar();
+    _xodimlar = JSON.parse(JSON.stringify(s.xodimlar));
+    _hodisaTurlar = [...s.hodisaTurlar];
+    _yuriqTurlar = [...s.yuriqTurlar];
+  }
+
+  function updateXodimField(input) {
+    const i = parseInt(input.dataset.i);
+    const field = input.dataset.field;
+    _xodimlar[i][field] = input.value;
+  }
+  function removeXodimRow(i) {
+    _xodimlar.splice(i,1);
+    renderXodimEditRows(_xodimlar);
+  }
+  function addXodimRow() {
+    _xodimlar.push({ism:'',lavozim:''});
+    renderXodimEditRows(_xodimlar);
+  }
+
+  function renderSimpleEditRows(containerId, arr, type) {
+    const el = document.getElementById(containerId);
+    el.innerHTML = '';
+    arr.forEach((val, i) => {
+      const row = document.createElement('div');
+      row.className = 'xodim-edit-row';
+      row.innerHTML = `
+        <input type="text" value="${val}" placeholder="Tur nomi..." data-i="${i}" oninput="updateSimpleField(this,'${type}')">
+        <button class="del-btn" onclick="removeSimpleRow(${i},'${type}')">✕</button>
+      `;
+      el.appendChild(row);
+    });
+  }
+  function updateSimpleField(input, type) {
+    const arr = type === 'hodisa' ? _hodisaTurlar : _yuriqTurlar;
+    arr[parseInt(input.dataset.i)] = input.value;
+  }
+  function removeSimpleRow(i, type) {
+    if (type === 'hodisa') { _hodisaTurlar.splice(i,1); renderSimpleEditRows('hodisa-tur-edit', _hodisaTurlar, 'hodisa'); }
+    else { _yuriqTurlar.splice(i,1); renderSimpleEditRows('yuriq-tur-edit', _yuriqTurlar, 'yuriq'); }
+  }
+  function addHodisaTurRow() { _hodisaTurlar.push(''); renderSimpleEditRows('hodisa-tur-edit', _hodisaTurlar, 'hodisa'); }
+  function addYuriqTurRow() { _yuriqTurlar.push(''); renderSimpleEditRows('yuriq-tur-edit', _yuriqTurlar, 'yuriq'); }
+
+  let _currentAccent = '#f0a500';
+  let _currentAccent2 = '#e05a00';
+  function setAccent(a, a2, el) {
+    _currentAccent = a; _currentAccent2 = a2;
+    document.querySelectorAll('.color-chip').forEach(c => c.classList.remove('active-chip'));
+    el.classList.add('active-chip');
+    document.documentElement.style.setProperty('--accent', a);
+    document.documentElement.style.setProperty('--accent2', a2);
+  }
+
+  function saveSozlamalar() {
+    // Read fresh from form
+    const rows = document.querySelectorAll('#xodim-list-edit .xodim-edit-row');
+    rows.forEach((row, i) => {
+      const inputs = row.querySelectorAll('input');
+      if (_xodimlar[i]) { _xodimlar[i].ism = inputs[0].value; _xodimlar[i].lavozim = inputs[1].value; }
+    });
+    const s = {
+      tashkilot: document.getElementById('s-tashkilot').value || "Transformatsiya Ofisi",
+      bolinma: document.getElementById('s-bolinma').value,
+      rahbar: document.getElementById('s-rahbar').value,
+      versiya: document.getElementById('s-versiya').value || "v1.0",
+      accent: _currentAccent,
+      accent2: _currentAccent2,
+      xodimlar: _xodimlar.filter(x => x.ism.trim()),
+      hodisaTurlar: _hodisaTurlar.filter(t => t.trim()),
+      yuriqTurlar: _yuriqTurlar.filter(t => t.trim())
+    };
+    localStorage.setItem('sozlamalar', JSON.stringify(s));
+    applySettings(s);
+    showToast('Sozlamalar saqlandi ✅');
+  }
+
+  // ---- EXPORT / IMPORT ----
+  function exportData() {
+    const data = {
+      yuriqlar,
+      hodisalar,
+      sozlamalar: getSozlamalar(),
+      exportDate: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'mehnat_muhofaza_' + new Date().toISOString().split('T')[0] + '.json';
+    a.click(); URL.revokeObjectURL(url);
+    showToast('Ma\'lumotlar yuklab olindi 📤');
+  }
+  function importData(event) {
+    const file = event.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (data.yuriqlar) { yuriqlar = data.yuriqlar; localStorage.setItem('yuriqlar', JSON.stringify(yuriqlar)); }
+        if (data.hodisalar) { hodisalar = data.hodisalar; localStorage.setItem('hodisalar', JSON.stringify(hodisalar)); }
+        if (data.sozlamalar) { localStorage.setItem('sozlamalar', JSON.stringify(data.sozlamalar)); applySettings(data.sozlamalar); }
+        updateHeaderStats(); refreshDash();
+        showToast('Ma\'lumotlar yuklandi ✅');
+      } catch { showToast('Fayl noto\'g\'ri format!','error'); }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+  function clearAllData() {
+    if (!confirm('Barcha ma\'lumotlar o\'chiriladi. Davom etasizmi?')) return;
+    if (!confirm('Ishonchingiz komilmi? Bu amalni qaytarib bo\'lmaydi!')) return;
+    yuriqlar = []; hodisalar = [];
+    localStorage.removeItem('yuriqlar'); localStorage.removeItem('hodisalar');
+    updateHeaderStats(); refreshDash();
+    showToast('Barcha ma\'lumotlar o\'chirildi');
+  }
+
+  // ---- INIT ----
+  function toggleTanishdi() {
+    const val = document.getElementById('h-tanishdi').value === 'true';
+    const newVal = !val;
+    document.getElementById('h-tanishdi').value = String(newVal);
+    const box = document.getElementById('check-box');
+    const icon = document.getElementById('check-icon');
+    if (newVal) {
+      box.style.background = 'var(--success)';
+      box.style.borderColor = 'var(--success)';
+      icon.style.display = 'block';
+    } else {
+      box.style.background = 'var(--bg)';
+      box.style.borderColor = 'var(--border)';
+      icon.style.display = 'none';
+    }
+  }
+
+  function toggleTanishdiFromModal(id) {
+    const r = hodisalar.find(x=>x.id===id); if(!r) return;
+    r.tanishdi = !r.tanishdi;
+    saveData();
+    showHodisaDetail(id);
+    renderHodisaList(hodisalar);
+    showToast(r.tanishdi ? 'Tanishib chiqildi deb belgilandi ✅' : 'Belgi olib tashlandi');
+  }
+
+  // ---- INIT ----
+  function init() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('y-sana').value = today;
+    document.getElementById('h-sana').value = today;
+    const now = new Date().toTimeString().slice(0,5);
+    document.getElementById('h-vaqt').value = now;
+    // Apply saved settings
+    const s = getSozlamalar();
+    _currentAccent = s.accent || '#f0a500';
+    _currentAccent2 = s.accent2 || '#e05a00';
+    loadEditArrays();
+    applySettings(s);
+    updateHeaderStats();
+    refreshDash();
+  }
+
+  // Override goPage to load sozlamalar form when entering settings
+  const _origGoPage = goPage;
+  function goPage(id, el) {
+    _origGoPage(id, el);
+    if (id === 'sozlamalar') {
+      loadEditArrays();
+      loadSozlamalarForm();
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
